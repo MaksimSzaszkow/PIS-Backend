@@ -6,7 +6,7 @@ import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Produces;
 
 @Controller("/")
-public class DefaultRestController{
+public class DefaultRestControler{
   @Get
   @Produces(MediaType.TEXT_PLAIN)
   public String index() {
