@@ -1,10 +1,8 @@
-FROM gradle
+FROM ghcr.io/graalvm/native-image
 WORKDIR /backend
 
-ADD . /backend
-
-RUN ./gradlew build
+ADD ./build/native/nativeCompile/pis-backend .
 
 EXPOSE 8080
 
-ENTRYPOINT ["./gradlew", "run"]
+ENTRYPOINT ["/backend/pis-backend"]
