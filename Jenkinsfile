@@ -10,7 +10,7 @@ pipeline {
         stage ('Build') {
             steps {
                 sh 'echo $JAVA_HOME'
-                sh 'sdk current'
+                sh 'native-image --version'
                 sh './gradlew nativeBuild'
                 sh './check.sh check-image'
                 sh 'docker build --tag back .'
