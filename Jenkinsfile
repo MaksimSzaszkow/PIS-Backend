@@ -12,8 +12,6 @@ pipeline {
         }
         stage ('Build') {
             steps {
-                sh 'java --version'
-                sh 'native-image --version'
                 sh './gradlew nativeBuild'
                 sh './check.sh check-image'
                 sh 'docker build --tag back .'
