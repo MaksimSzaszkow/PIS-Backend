@@ -2,6 +2,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version "7.1.2"
     id("io.micronaut.application") version "3.6.3"
     id 'maven-publish'
+    id "org.sonarqube" version "3.4.0.2513"
 }
 
 version = "0.1"
@@ -9,6 +10,12 @@ group = "studia.pisbackend"
 
 repositories {
     mavenCentral()
+}
+
+sonarqube {
+  properties {
+    property "sonar.projectKey", "PIS-Backend"
+  }
 }
 
 dependencies {
