@@ -1,6 +1,9 @@
 "PIS-Backend test, build, deploy pipeline"
 pipeline {
     agent any
+    tools {
+        jdk 'GraalVM'
+    }
     stages {
         stage ('Test') {
             steps {
