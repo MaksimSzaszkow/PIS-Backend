@@ -1,6 +1,7 @@
 plugins {
     id("com.github.johnrengelman.shadow") version "7.1.2"
     id("io.micronaut.application") version "3.6.3"
+    id 'maven-publish'
 }
 
 version = "0.1"
@@ -39,5 +40,30 @@ micronaut {
     }
 }
 
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            Properties properties = new Properties()
+            def propertiesFile = project.rootProject.file('local.properties')
+            if (propertiesFile.exists()) {
+                properties.load(propertiesFile.newDataInputStream())
+            }
+            def repoLogin = properties.getProperty("repoLogin")
+            def repoPassword = properties.getProperty("repoPassword")
+            def releasesRepoUrl = project.repoRelease
+            def snapshotsRepoUrl = project.repoSnapshot
 
-
+            allowInsecureProtocol = true
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+                username = "$repoLogin"
+                password = "$repoPassword"
+            }
+        }
+    }
+}
