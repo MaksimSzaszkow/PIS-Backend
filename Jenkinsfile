@@ -9,6 +9,7 @@ pipeline {
         }
         stage ('Build') {
             steps {
+                sh 'whoami'
                 sh 'sdk current'
                 sh './gradlew nativeBuild'
                 sh './check.sh check-image'
