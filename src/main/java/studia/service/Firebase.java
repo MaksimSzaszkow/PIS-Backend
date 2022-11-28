@@ -1,0 +1,55 @@
+package studia.service;
+
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseToken;
+import io.micronaut.core.io.ResourceResolver;
+import io.micronaut.core.io.scan.ClassPathResourceLoader;
+import java.io.IOException;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Singleton;
+
+@Singleton
+public class Firebase {
+
+    private boolean initialized = false;
+
+    @PostConstruct
+    public void init() {
+        if (initialized) {
+            return;
+        }
+
+        try {
+            var loader = new ResourceResolver()
+                    .getLoader(ClassPathResourceLoader.class)
+                    .get();
+
+            var credentials = GoogleCredentials.fromStream(
+                    loader.getResourceAsStream("firebase-adminsdk.json").get());
+
+            var options = FirebaseOptions.builder()
+                    .setCredentials(credentials)
+                    .build();
+
+            FirebaseApp.initializeApp(options);
+            initialized = true;
+
+        }
+        catch (IOException e) {
+            LoggerFactory
+                    .getLogger(Firebase.class)
+                    .error("Failed to initialize Firebase authentication", e);
+        }
+    }
+
+    public FirebaseToken verifyIdToken(String idToken) throws FirebaseAuthException {
+        return FirebaseAuth.getInstance().verifyIdToken(idToken);
+    }
+
+}

@@ -14,3 +14,5 @@ out/
 .classpath
 .factorypath
 local.properties
+src/main/resources/serviceAccount.json
+bin/main/serviceAccount.json
