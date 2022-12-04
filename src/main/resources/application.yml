@@ -10,9 +10,21 @@ micronaut:
             generator:
               secret:
                 '"${JWT_GENERATOR_SIGNATURE_SECRET:pleaseChangeThissecretForANewOne}"'
+
   server:
     port: 8000
-    
+    cors:
+      enabled: true
+      configurations:
+        web:
+          allowedOrigins:
+            - http://localhost:3000
+          allowedHeaders:
+            - Content-Type
+            - Authorization
+          exposedHeaders:
+            - Content-Type
+            - Authorization
 netty:
   default:
     allocator:
