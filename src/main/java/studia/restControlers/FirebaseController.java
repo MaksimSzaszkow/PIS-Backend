@@ -9,7 +9,7 @@ import com.google.firebase.auth.FirebaseAuthException;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.annotation.*;
 import io.micronaut.security.annotation.Secured;
-import io.micronaut.security.authentication.Authentication;
+import io.micronaut.security.authentication.ClientAuthentication;
 import io.micronaut.security.rules.SecurityRule;
 import io.micronaut.security.token.jwt.generator.JwtTokenGenerator;
 
@@ -36,6 +36,7 @@ public class FirebaseController {
     }
 
     @Post("/auth")
+    @Secured(SecurityRule.IS_ANONYMOUS)
     public Optional<AuthHeader> auth(HttpRequest<?> request) throws FirebaseAuthException {
         var auth = request.getHeaders().get("Authorization");
         var opt = AuthHeader.parse(auth);
@@ -43,9 +44,8 @@ public class FirebaseController {
         if (opt.isPresent()) {
             var authHeader = opt.get();
             var firebaseToken = firebase.verifyIdToken(authHeader.getToken());
-            var userDetails = new Authentication(firebaseToken.getName(), 
-                                              Collections.emptyList(), 
-                                              firebaseToken.getClaims());
+            var userDetails = new ClientAuthentication(firebaseToken.getName(), 
+                                              Collections.emptyMap());
             var jwt = jwtTokenGenerator.generateToken(userDetails, 3600);
             out = jwt.map(t -> new AuthHeader("Bearer", t));
         }
