@@ -29,7 +29,7 @@ public class FirebaseController {
         this.firebase = firebase;
     }
 
-    @Get(uri="/", produces="text/plain")
+    @Get("/default")
     @Secured(SecurityRule.IS_AUTHENTICATED)
     public String index() {
         return "Example Response";
