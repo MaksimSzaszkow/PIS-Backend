@@ -1,6 +1,19 @@
 micronaut:
   application:
     name: pisBackend
+  server:
+    cors:
+      enabled: true
+      configurations:
+        web:
+          allowedOrigins:
+            - http://localhost:3000
+          allowedHeaders:
+            - Content-Type
+            - Authorization
+          exposedHeaders:
+            - Content-Type
+            - Authorization
 netty:
   default:
     allocator:
