@@ -9,7 +9,7 @@ pipeline {
             steps {
                 sh './gradlew sonarqube \
                         -Dsonar.projectKey=pis-back \
-                        -Dsonar.host.url=https://8a4c-194-29-160-174.eu.ngrok.io \
+                        -Dsonar.host.url=http://localhost:9000 \
                         -Dsonar.login=sqp_c226232c6e08776493055afd83f90e9c5560675a'
             }
         }
