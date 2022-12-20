@@ -35,6 +35,7 @@ public class FirebaseController {
         return "Example Response";
     }
 
+
     @Post("/auth")
     @Secured(SecurityRule.IS_ANONYMOUS)
     public Optional<AuthHeader> auth(HttpRequest<?> request) throws FirebaseAuthException {

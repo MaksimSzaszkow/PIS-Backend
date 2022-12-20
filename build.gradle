@@ -22,6 +22,8 @@ sonarqube {
 dependencies {
     annotationProcessor("io.micronaut:micronaut-http-validation")
     annotationProcessor("io.micronaut.security:micronaut-security-annotations")
+    annotationProcessor("io.micronaut.data:micronaut-data-processor")
+
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-jackson-databind")
     implementation("io.micronaut.security:micronaut-security")
@@ -29,9 +31,17 @@ dependencies {
     implementation("io.micronaut.security:micronaut-security-session")
     implementation("javax.inject:javax.inject:1")
     implementation("jakarta.annotation:jakarta.annotation-api")
-    runtimeOnly("ch.qos.logback:logback-classic")
     implementation("io.micronaut:micronaut-validation")
-    implementation("com.google.firebase:firebase-admin:7.0.0")
+    implementation('com.google.firebase:firebase-admin:9.1.1')
+    implementation("io.micronaut.data:micronaut-data-jdbc")
+    implementation("io.micronaut.reactor:micronaut-reactor")
+    implementation("io.micronaut.reactor:micronaut-reactor-http-client")
+    implementation("io.micronaut.sql:micronaut-jdbc-hikari")
+
+
+    runtimeOnly("ch.qos.logback:logback-classic")
+    runtimeOnly("com.h2database:h2")
+    compileOnly("org.graalvm.nativeimage:svm")
 }
 
 
