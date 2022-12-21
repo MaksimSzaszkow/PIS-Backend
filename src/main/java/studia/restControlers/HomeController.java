@@ -8,12 +8,19 @@ import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Produces;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
+import studia.service.Firebase;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
+import javax.inject.Inject;
+
+import com.google.api.core.ApiFuture;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
 
@@ -21,25 +28,19 @@ import com.google.cloud.firestore.FirestoreOptions;
 @Controller
 public class HomeController {
 
+    @Inject private Firebase firebase;
+
     @Produces(MediaType.TEXT_PLAIN)
     @Get
-    public String index(Principal principal) throws IOException {
-        var loader = new ResourceResolver()
-                    .getLoader(ClassPathResourceLoader.class)
-                    .get();
-        
-        var credentials = GoogleCredentials.fromStream(
-                    loader.getResourceAsStream("firebase-adminsdk.json").get());
-        
-        FirestoreOptions firestoreOptions = FirestoreOptions.getDefaultInstance().toBuilder()
-        .setProjectId("pis-projekt-a4a77")
-        .setCredentials(credentials)
-        .build();
-
-        Firestore db = firestoreOptions.getService();
+    public String index(Principal principal) throws IOException, InterruptedException, ExecutionException {
+        Firestore db = firebase.getDb();
 
         DocumentReference docRef = db.collection("test").document("test");
-        System.out.println(docRef);
+        ApiFuture<DocumentSnapshot> future = docRef.get();
+        DocumentSnapshot document = future.get();
+        if (document.exists()) {
+            return document.getData().toString();
+        }
 
         return principal.getName();
     }

@@ -1,6 +1,8 @@
 package studia.service;
 
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.FirestoreOptions;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
@@ -18,6 +20,7 @@ import javax.inject.Singleton;
 public class Firebase {
 
     private boolean initialized = false;
+    private Firestore db;
 
     @PostConstruct
     public void init() {
@@ -33,13 +36,18 @@ public class Firebase {
             var credentials = GoogleCredentials.fromStream(
                     loader.getResourceAsStream("firebase-adminsdk.json").get());
 
-            var options = FirebaseOptions.builder()
+            var firebaseOptions = FirebaseOptions.builder()
                     .setCredentials(credentials)
                     .build();
 
-            FirebaseApp.initializeApp(options);
+            var firestoreOptions = FirestoreOptions.getDefaultInstance().toBuilder()
+                    .setCredentials(credentials)
+                    .build();
+            
+            FirebaseApp.initializeApp(firebaseOptions);
+            db = firestoreOptions.getService();
+            
             initialized = true;
-
         }
         catch (IOException e) {
             LoggerFactory
@@ -50,6 +58,10 @@ public class Firebase {
 
     public FirebaseToken verifyIdToken(String idToken) throws FirebaseAuthException {
         return FirebaseAuth.getInstance().verifyIdToken(idToken);
+    }
+
+    public Firestore getDb() {
+        return db;
     }
 
 }

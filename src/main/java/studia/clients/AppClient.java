@@ -17,7 +17,7 @@ public interface AppClient {
 
     @Post("/login")
     BearerAccessRefreshToken login(@Body UsernamePasswordCredentials credentials);
-
+    
     @Consumes(TEXT_PLAIN)
     @Get
     String home(@Header(AUTHORIZATION) String authorization);
