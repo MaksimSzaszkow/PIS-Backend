@@ -31,7 +31,7 @@ public class HomeController {
     @Inject private Firebase firebase;
 
     @Produces(MediaType.TEXT_PLAIN)
-    @Get
+    @Get("/verify-auth")
     public String index(Principal principal) throws IOException, InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
