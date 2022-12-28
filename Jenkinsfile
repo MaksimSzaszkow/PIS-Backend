@@ -20,7 +20,7 @@ pipeline {
         stage ('Deploy') {
             steps {
                 sh './check.sh check-ps'
-                sh 'docker run -d -p 8080:8080 --name back back'
+                sh 'docker run -d -p 8080:8000 --name back back'
             }
         }
     }
