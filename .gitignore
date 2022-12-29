@@ -16,3 +16,4 @@ out/
 local.properties
 src/main/resources/serviceAccount.json
 .bin
+src/main/resources/pis-projekt-pk.json

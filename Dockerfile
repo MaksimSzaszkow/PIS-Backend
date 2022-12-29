@@ -1,8 +1,8 @@
-FROM ghcr.io/graalvm/native-image
+FROM openjdk:11
 WORKDIR /backend
 
-ADD ./build/native/nativeCompile/pis-backend .
+ADD ./build/libs/pis-backend-0.1-all.jar application.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["/backend/pis-backend"]
+CMD java -jar application.jar
