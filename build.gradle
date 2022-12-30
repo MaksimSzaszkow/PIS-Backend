@@ -15,7 +15,8 @@ repositories {
 
 sonarqube {
   properties {
-    property "sonar.projectKey", "PIS-Backend"
+    property "sonar.projectKey", "PIS-Backend";
+    property "sonar.jacoco.reportPaths", "build/jacoco/test.exec";
   }
 }
 
