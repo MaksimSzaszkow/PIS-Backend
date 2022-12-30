@@ -15,7 +15,8 @@ repositories {
 
 sonarqube {
   properties {
-    property "sonar.projectKey", "PIS-Backend"
+    property "sonar.projectKey", "PIS-Backend";
+    property "sonar.jacoco.reportPaths", "build/reports/jacoco/test/jacocoTestReport.xml";
   }
 }
 
@@ -96,4 +97,8 @@ test {
 }
 jacocoTestReport {
     dependsOn test
+    reports {
+        xml.enabled true
+        html.enabled true
+    }
 }
