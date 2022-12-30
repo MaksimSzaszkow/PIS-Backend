@@ -8,7 +8,6 @@ import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
 import studia.service.Firebase;
 
-import java.io.IOException;
 import java.security.Principal;
 import java.util.concurrent.ExecutionException;
 
@@ -27,7 +26,7 @@ public class HomeController {
 
     @Produces(MediaType.TEXT_PLAIN)
     @Get("/verify-auth")
-    public String index(Principal principal) throws IOException, InterruptedException, ExecutionException {
+    public String index(Principal principal) throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
         DocumentReference docRef = db.collection("test").document("test");

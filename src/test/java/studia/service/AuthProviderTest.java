@@ -44,17 +44,18 @@ public class AuthProviderTest {
     @Test
     void authenticationTestPass() {
         UsernamePasswordCredentials creds = new UsernamePasswordCredentials(USERNAME, PASSWORD);
-        HttpRequest request = HttpRequest.POST("/login", creds);
+        HttpRequest<UsernamePasswordCredentials> request = HttpRequest.POST("/login", creds);
         HttpResponse<BearerAccessRefreshToken> rsp = client.toBlocking().exchange(request, BearerAccessRefreshToken.class);
         
         assertEquals(OK, rsp.getStatus());
 
         BearerAccessRefreshToken bearerAccessRefreshToken = rsp.body();
-        
+
+        assert bearerAccessRefreshToken != null;
         assertEquals(USERNAME, bearerAccessRefreshToken.getUsername());
         
         String accessToken = bearerAccessRefreshToken.getAccessToken();
-        HttpRequest requestWithAuthorization = HttpRequest.GET("/verify-auth")
+        HttpRequest<Object> requestWithAuthorization = HttpRequest.GET("/verify-auth")
                 .accept(TEXT_PLAIN)
                 .bearerAuth(accessToken);
         HttpResponse<String> response = client.toBlocking().exchange(requestWithAuthorization, String.class);
