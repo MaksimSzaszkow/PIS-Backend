@@ -20,7 +20,7 @@ pipeline {
         }
         stage ('Build') {
             steps {
-                sh './gradlew nativeBuild'
+                sh './gradlew build'
                 sh './check.sh check-image'
                 sh 'docker build --tag back .'
             }
