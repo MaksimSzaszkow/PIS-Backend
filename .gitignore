@@ -15,5 +15,5 @@ out/
 .factorypath
 local.properties
 src/main/resources/serviceAccount.json
-.bin
+bin/
 src/main/resources/pis-projekt-pk.json
