@@ -11,7 +11,6 @@ import studia.service.Firebase;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -31,7 +30,11 @@ public class ReservationController {
         Firestore db = firebase.getDb();
 
 //        Query query = db.collection("reservations").whereEqualTo("user", principal.getName());
-        Query query = db.collection("reservations").whereEqualTo("user", "mboruwa");
+        Query query = db.collection("reservations")
+                .whereEqualTo("user", "mboruwa")
+                .orderBy("date", Query.Direction.ASCENDING)
+                .orderBy("time", Query.Direction.ASCENDING);
+
         ApiFuture<QuerySnapshot> querySnapshot = query.get();
         QuerySnapshot documents = querySnapshot.get();
         return documents.isEmpty()
@@ -41,12 +44,17 @@ public class ReservationController {
                     .collect(Collectors.toList());
 
     }
+    @Produces(MediaType.APPLICATION_JSON)
     @Get("/all-reservations")
     public List<Object> index() throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
         CollectionReference reservations = db.collection("reservations");
-        ApiFuture<QuerySnapshot> querySnapshot = reservations.get();
+        Query reservationsQuery = reservations
+                .orderBy("date", Query.Direction.ASCENDING)
+                .orderBy("time", Query.Direction.ASCENDING);
+
+        ApiFuture<QuerySnapshot> querySnapshot = reservationsQuery.get();
         QuerySnapshot documents = querySnapshot.get();
         return documents.isEmpty()
                 ? List.of()
@@ -59,6 +67,7 @@ public class ReservationController {
     @Post("/add-reservation")
     public void addReservation(@Body ReservationData data) throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
+
 
         if(data.getUser() == null || data.getDate() == null || data.getTime() == null || data.getRoom() == null) {
             throw new IllegalArgumentException("Invalid data");
