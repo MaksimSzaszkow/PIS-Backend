@@ -2,15 +2,15 @@ package studia.restControlers;
 
 import com.google.cloud.firestore.*;
 import io.micronaut.http.MediaType;
-import io.micronaut.http.annotation.Controller;
-import io.micronaut.http.annotation.Get;
-import io.micronaut.http.annotation.Produces;
+import io.micronaut.http.annotation.*;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
+import studia.datatypes.ReservationData;
 import studia.service.Firebase;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -54,5 +54,37 @@ public class ReservationController {
                     .map(QueryDocumentSnapshot::getData)
                     .collect(Collectors.toList());
 
+    }
+
+    @Post("/add-reservation")
+    public void addReservation(@Body ReservationData data) throws InterruptedException, ExecutionException {
+        Firestore db = firebase.getDb();
+
+        if(data.getUser() == null || data.getDate() == null || data.getTime() == null || data.getRoom() == null) {
+            throw new IllegalArgumentException("Invalid data");
+        }
+
+        CollectionReference reservations = db.collection("reservations");
+        QuerySnapshot querySnapshot = reservations
+                .whereEqualTo("date", data.getDate())
+                .whereEqualTo("time", data.getTime())
+                .whereEqualTo("room", data.getRoom())
+                .get()
+                .get();
+
+
+        if(querySnapshot.isEmpty()) {
+            DocumentReference docRef = reservations.document();
+            ApiFuture<WriteResult> result = docRef.set(
+                    Map.of(
+                            "user", data.getUser(),
+                            "date", data.getDate(),
+                            "time", data.getTime(),
+                            "room", data.getRoom()
+                    )
+            );
+        } else {
+            throw new IllegalArgumentException("Reservation already exists");
+        }
     }
 }
