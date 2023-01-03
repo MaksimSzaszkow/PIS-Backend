@@ -11,6 +11,7 @@ micronaut:
               secret: '"${JWT_GENERATOR_SIGNATURE_SECRET:pleaseChangeThisSecretForANewOne}"'
 
   server:
+    port: 8000
     cors:
       enabled: true
       configurations:

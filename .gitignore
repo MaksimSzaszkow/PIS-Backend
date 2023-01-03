@@ -13,3 +13,7 @@ out/
 .settings
 .classpath
 .factorypath
+local.properties
+src/main/resources/serviceAccount.json
+bin/
+src/main/resources/pis-projekt-pk.json

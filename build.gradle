@@ -1,6 +1,9 @@
 plugins {
     id("com.github.johnrengelman.shadow") version "7.1.2"
     id("io.micronaut.application") version "3.6.3"
+    id 'maven-publish'
+    id "org.sonarqube" version "3.4.0.2513"
+    id 'jacoco'
 }
 
 version = "0.1"
@@ -10,14 +13,36 @@ repositories {
     mavenCentral()
 }
 
+sonarqube {
+  properties {
+    property "sonar.projectKey", "PIS-Backend";
+    property "sonar.jacoco.reportPaths", "build/reports/jacoco/test/jacocoTestReport.xml";
+  }
+}
+
 dependencies {
     annotationProcessor("io.micronaut:micronaut-http-validation")
+    annotationProcessor("io.micronaut.security:micronaut-security-annotations")
+    annotationProcessor("io.micronaut.data:micronaut-data-processor")
+
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-jackson-databind")
+    implementation("io.micronaut.security:micronaut-security")
+    implementation("io.micronaut.security:micronaut-security-jwt")
+    implementation("io.micronaut.security:micronaut-security-session")
+    implementation("javax.inject:javax.inject:1")
     implementation("jakarta.annotation:jakarta.annotation-api")
-    runtimeOnly("ch.qos.logback:logback-classic")
     implementation("io.micronaut:micronaut-validation")
+    implementation('com.google.firebase:firebase-admin:9.1.1')
+    implementation("io.micronaut.data:micronaut-data-jdbc")
+    implementation("io.micronaut.reactor:micronaut-reactor")
+    implementation("io.micronaut.reactor:micronaut-reactor-http-client")
+    implementation("io.micronaut.sql:micronaut-jdbc-hikari")
 
+
+    runtimeOnly("ch.qos.logback:logback-classic")
+    runtimeOnly("com.h2database:h2")
+    compileOnly("org.graalvm.nativeimage:svm")
 }
 
 
@@ -39,5 +64,41 @@ micronaut {
     }
 }
 
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            Properties properties = new Properties()
+            def propertiesFile = project.rootProject.file('local.properties')
+            if (propertiesFile.exists()) {
+                properties.load(propertiesFile.newDataInputStream())
+            }
+            def repoLogin = properties.getProperty("repoLogin")
+            def repoPassword = properties.getProperty("repoPassword")
+            def releasesRepoUrl = project.repoRelease
+            def snapshotsRepoUrl = project.repoSnapshot
 
+            allowInsecureProtocol = true
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+                username = "$repoLogin"
+                password = "$repoPassword"
+            }
+        }
+    }
+}
 
+test {
+    finalizedBy jacocoTestReport
+}
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.enabled true
+        html.enabled true
+    }
+}
