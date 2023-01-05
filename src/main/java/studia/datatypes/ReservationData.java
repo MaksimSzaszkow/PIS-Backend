@@ -15,7 +15,7 @@ public class ReservationData {
 
     @NotBlank
     @NotNull
-    private String time;
+    private int time;
 
     @NotBlank
     @NotNull
@@ -24,7 +24,7 @@ public class ReservationData {
     public ReservationData() {
     }
 
-    public ReservationData(String user, String date, String time, String room) {
+    public ReservationData(String user, String date, int time, String room) {
         this.user = user;
         this.date = date;
         this.time = time;
@@ -47,11 +47,14 @@ public class ReservationData {
         this.date = date;
     }
 
-    public String getTime() {
+    public int getTime() {
         return time;
     }
 
-    public void setTime(String time) {
+    public void setTime(int time) {
+        if(time < 9 || time > 17) {
+            throw new IllegalArgumentException("Invalid time");
+        }
         this.time = time;
     }
 
