@@ -115,46 +115,16 @@ public class ReservationController {
         }
     }
 
-    @Post("/get-available-rooms")
-    public List<RoomData> getAvailableSlots(@Body DatetimeData term) throws InterruptedException, ExecutionException {
+    @Post("/delete-reservation")
+    public void deleteReservation(@Body ReservationData data) throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
-//        Query query = db.collection("teams").whereEqualTo("teamLeader", principal.getName());
-        Query teamQuery = db.collection("teams")
-                .whereEqualTo("teamLeader", "mboruwa");
-        QuerySnapshot teamDocuments = teamQuery.get().get();
-        if (teamDocuments.isEmpty()) {
-            throw new IllegalArgumentException("You are not a team leader");
-        }
-        TeamData team = teamDocuments.getDocuments().get(0).toObject(TeamData.class);
-
-        Query reservationsQuery = db.collection("reservations")
-                .whereEqualTo("date", term.getDate())
-                .whereEqualTo("time", term.getTime());
-
-        QuerySnapshot reservationsDocuments = reservationsQuery.get().get();
-        List<String> reservedRooms = reservationsDocuments.getDocuments().stream()
-                .map((snapshot) -> snapshot.toObject(ReservationData.class).getRoom())
-                .collect(Collectors.toList());
-        Query roomsQuery = db.collection("rooms")
-                .whereGreaterThanOrEqualTo("size", team.getTeamMembers().size())
-                .orderBy("size", Query.Direction.ASCENDING);
-
-        QuerySnapshot roomsDocuments = roomsQuery.get().get();
-        if (roomsDocuments.isEmpty()) {
-            throw new IllegalArgumentException("Team doesn't fit in any room");
-        }
-        List<RoomData> rooms = roomsDocuments.getDocuments().stream()
-                .map((snapshot) -> {
-                    RoomData room = snapshot.toObject(RoomData.class);
-                    room.setId(snapshot.getId());
-                    return room;
-                })
-                .collect(Collectors.toList());
-        for (String room : reservedRooms) {
-            rooms.removeIf((r) -> r.getName().equals(room));
+        if(data.getUser() == null || data.getDate() == null || data.getRoom() == null) {
+            throw new IllegalArgumentException("Invalid data");
         }
 
-        return rooms;
+        ApiFuture<WriteResult> writeResult = db.collection("cities").document("DC").delete();
+
+        System.out.println("Update time : " + writeResult.get().getUpdateTime());
     }
 }
