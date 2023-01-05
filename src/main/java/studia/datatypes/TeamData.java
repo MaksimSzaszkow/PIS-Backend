@@ -5,16 +5,12 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 public class TeamData {
-    @NotNull
-    @NotBlank
+
+    private String id;
     private String name;
 
-    @NotNull
-    @NotBlank
     private String teamLeader;
 
-    @NotNull
-    @NotBlank
     private List<String> teamMembers;
 
     public TeamData() {
@@ -24,6 +20,21 @@ public class TeamData {
         this.name = name;
         this.teamLeader = teamLeader;
         this.teamMembers = teamMembers;
+    }
+
+    public TeamData(String id, String name, String teamLeader, List<String> teamMembers) {
+        this.id = id;
+        this.name = name;
+        this.teamLeader = teamLeader;
+        this.teamMembers = teamMembers;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {

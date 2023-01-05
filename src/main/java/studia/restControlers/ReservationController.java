@@ -48,7 +48,11 @@ public class ReservationController {
         return reservationsDocuments.isEmpty()
                 ? List.of()
                 : reservationsDocuments.getDocuments().stream()
-                .map((snapshot) -> snapshot.toObject(ReservationData.class))
+                .map((snapshot) -> {
+                    ReservationData res = snapshot.toObject(ReservationData.class);
+                    res.setId(snapshot.getId());
+                    return res;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -65,7 +69,11 @@ public class ReservationController {
         return reservationsDocuments.isEmpty()
                 ? List.of()
                 : reservationsDocuments.getDocuments().stream()
-                .map((snapshot) -> snapshot.toObject(ReservationData.class))
+                .map((snapshot) -> {
+                    ReservationData res = snapshot.toObject(ReservationData.class);
+                    res.setId(snapshot.getId());
+                    return res;
+                })
                 .collect(Collectors.toList());
 
     }
@@ -111,7 +119,7 @@ public class ReservationController {
     public List<RoomData> getAvailableSlots(@Body DatetimeData term) throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
-//        Query query = db.collection("reservations").whereEqualTo("user", principal.getName());
+//        Query query = db.collection("teams").whereEqualTo("teamLeader", principal.getName());
         Query teamQuery = db.collection("teams")
                 .whereEqualTo("teamLeader", "mboruwa");
         QuerySnapshot teamDocuments = teamQuery.get().get();
@@ -137,7 +145,11 @@ public class ReservationController {
             throw new IllegalArgumentException("Team doesn't fit in any room");
         }
         List<RoomData> rooms = roomsDocuments.getDocuments().stream()
-                .map((snapshot) -> snapshot.toObject(RoomData.class))
+                .map((snapshot) -> {
+                    RoomData room = snapshot.toObject(RoomData.class);
+                    room.setId(snapshot.getId());
+                    return room;
+                })
                 .collect(Collectors.toList());
         for (String room : reservedRooms) {
             rooms.removeIf((r) -> r.getName().equals(room));

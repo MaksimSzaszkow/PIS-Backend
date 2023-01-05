@@ -6,8 +6,6 @@ import javax.validation.constraints.NotNull;
 
 public class DatetimeData {
 
-    @NotBlank
-    @NotNull
     private String date;
     private int time;
 
@@ -32,7 +30,7 @@ public class DatetimeData {
     }
 
     public void setTime(int time) {
-        if(time > 17 || time < 9) {
+        if (time > 17 || time < 9) {
             throw new IllegalArgumentException("Invalid time");
         }
         this.time = time;
