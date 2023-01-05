@@ -29,7 +29,7 @@ public class ReservationController {
     public List<Object> MyReservations() throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
-//        Query query = db.collection("reservations").whereEqualTo("user", principal.getName());
+        // Query query = db.collection("reservations").whereEqualTo("user", principal.getName());
         Query query = db.collection("reservations")
                 .whereEqualTo("user", "mboruwa")
                 .orderBy("date", Query.Direction.ASCENDING)
@@ -59,7 +59,7 @@ public class ReservationController {
         return documents.isEmpty()
                 ? List.of()
                 : documents.getDocuments().stream()
-                    .map(QueryDocumentSnapshot::getData)
+                    .map((document) -> {return document.getData() + document.getId();})
                     .collect(Collectors.toList());
 
     }
@@ -95,5 +95,18 @@ public class ReservationController {
         } else {
             throw new IllegalArgumentException("Reservation already exists");
         }
+    }
+
+    @Post("/delete-reservation")
+    public void deleteReservation(@Body ReservationData data) throws InterruptedException, ExecutionException {
+        Firestore db = firebase.getDb();
+
+        if(data.getUser() == null || data.getDate() == null || data.getRoom() == null) {
+            throw new IllegalArgumentException("Invalid data");
+        }
+
+        ApiFuture<WriteResult> writeResult = db.collection("cities").document("DC").delete();
+
+        System.out.println("Update time : " + writeResult.get().getUpdateTime());
     }
 }
