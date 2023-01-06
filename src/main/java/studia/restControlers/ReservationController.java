@@ -6,6 +6,7 @@ import io.micronaut.http.annotation.*;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
 import studia.datatypes.DatetimeData;
+import studia.datatypes.EditReservationRequest;
 import studia.datatypes.ReservationData;
 import studia.datatypes.RoomData;
 import studia.datatypes.TeamData;
@@ -116,15 +117,39 @@ public class ReservationController {
     }
 
     @Post("/delete-reservation")
-    public void deleteReservation(@Body ReservationData data) throws InterruptedException, ExecutionException {
+    public void deleteReservation(@Body String reservationId) throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
-        if(data.getUser() == null || data.getDate() == null || data.getRoom() == null) {
+        if(reservationId == null) {
             throw new IllegalArgumentException("Invalid data");
         }
 
-        ApiFuture<WriteResult> writeResult = db.collection("cities").document("DC").delete();
+        ApiFuture<WriteResult> writeResult = db.collection("reservations").document(reservationId).delete();
 
         System.out.println("Update time : " + writeResult.get().getUpdateTime());
+    }
+
+    @Post("/edit-reservation")
+    public void editReservation(@Body EditReservationRequest request) throws InterruptedException, ExecutionException {
+        Firestore db = firebase.getDb();
+
+        if(request.getReservationId() == null || request.getEditDate() == null ||
+           request.getEditTime() == null || request.getEditUser() == null) {
+            throw new IllegalArgumentException("Invalid data");
+        }
+
+        DocumentReference reservation = db.collection("reservations").document(request.getReservationId());
+        DocumentSnapshot reservationQuerySnapshot = reservation.get().get();
+
+        if (reservationQuerySnapshot.exists()) {
+            ApiFuture<WriteResult> result = reservation.update(
+                    Map.of(
+                            "user", request.getEditUser(),
+                            "date", request.getEditDate(),
+                            "time", request.getEditTime()
+                    ));
+        } else {
+            throw new IllegalArgumentException("Reservation doesn't exist");
+        }
     }
 }

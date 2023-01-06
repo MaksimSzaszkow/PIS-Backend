@@ -5,7 +5,8 @@ import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.*;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
-import studia.datatypes.ReservationData;
+import studia.datatypes.EditRoomRequest;
+import studia.datatypes.RoomData;
 import studia.service.Firebase;
 
 import java.security.Principal;
@@ -38,7 +39,11 @@ public class RoomController {
         return documents.isEmpty()
                 ? List.of()
                 : documents.getDocuments().stream()
-                    .map(QueryDocumentSnapshot::getData)
+                    .map((snapshot) -> {
+                        RoomData res = snapshot.toObject(RoomData.class);
+                        res.setId(snapshot.getId());
+                        return res;
+                    })
                     .collect(Collectors.toList());
 
     }
@@ -55,9 +60,49 @@ public class RoomController {
         return documents.isEmpty()
                 ? List.of()
                 : documents.getDocuments().stream()
-                    .map(QueryDocumentSnapshot::getData)
+                    .map((snapshot) -> {
+                        RoomData res = snapshot.toObject(RoomData.class);
+                        res.setId(snapshot.getId());
+                        return res;
+                    })
                     .collect(Collectors.toList());
 
+    }
+
+    @Post("/delete-room")
+    public void deleteRoom(@Body String roomId) throws InterruptedException, ExecutionException {
+        Firestore db = firebase.getDb();
+
+        if(roomId == null) {
+            throw new IllegalArgumentException("Invalid data");
+        }
+
+        ApiFuture<WriteResult> writeResult = db.collection("rooms").document(roomId).delete();
+
+        System.out.println("Update time : " + writeResult.get().getUpdateTime());
+    }
+
+    @Post("/edit-room")
+    public void editRoom(@Body EditRoomRequest request) throws InterruptedException, ExecutionException {
+        Firestore db = firebase.getDb();
+
+        if(request.getRoomId() == null || request.getEditName() == null ||
+           request.getEditSize() == null) {
+            throw new IllegalArgumentException("Invalid data");
+        }
+
+        DocumentReference room = db.collection("rooms").document(request.getRoomId());
+        DocumentSnapshot roomQuerySnapshot = room.get().get();
+
+        if (roomQuerySnapshot.exists()) {
+            ApiFuture<WriteResult> result = room.update(
+                    Map.of(
+                            "name", request.getEditName(),
+                            "size", request.getEditSize()
+                    ));
+        } else {
+            throw new IllegalArgumentException("Room doesn't exist");
+        }
     }
 
     // @Post("/add-room")
