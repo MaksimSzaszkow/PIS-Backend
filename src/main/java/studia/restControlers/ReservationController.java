@@ -10,6 +10,7 @@ import studia.datatypes.EditReservationRequest;
 import studia.datatypes.ReservationData;
 import studia.datatypes.RoomData;
 import studia.datatypes.TeamData;
+import studia.exceptionHandlers.ReservedRoomException;
 import studia.service.Firebase;
 
 import java.security.Principal;
@@ -116,11 +117,12 @@ public class ReservationController {
         }
     }
 
+
     @Post("/delete-reservation")
     public void deleteReservation(@Body String reservationId) throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
-        if(reservationId == null) {
+        if (reservationId == null) {
             throw new IllegalArgumentException("Invalid data");
         }
 
@@ -133,8 +135,8 @@ public class ReservationController {
     public void editReservation(@Body EditReservationRequest request) throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
-        if(request.getReservationId() == null || request.getEditDate() == null ||
-           request.getEditTime() == null || request.getEditUser() == null) {
+        if (request.getReservationId() == null || request.getEditDate() == null ||
+                request.getEditTime() == null || request.getEditUser() == null) {
             throw new IllegalArgumentException("Invalid data");
         }
 

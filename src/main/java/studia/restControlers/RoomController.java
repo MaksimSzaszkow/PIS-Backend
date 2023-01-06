@@ -5,8 +5,8 @@ import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.*;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
-import studia.datatypes.EditRoomRequest;
-import studia.datatypes.RoomData;
+import studia.datatypes.*;
+import studia.exceptionHandlers.ReservedRoomException;
 import studia.service.Firebase;
 
 import java.security.Principal;
@@ -23,7 +23,8 @@ import com.google.api.core.ApiFuture;
 @Controller("/rooms")
 public class RoomController {
 
-    @Inject private Firebase firebase;
+    @Inject
+    private Firebase firebase;
 
     @Produces(MediaType.APPLICATION_JSON)
     @Get("/my-rooms")
@@ -39,14 +40,15 @@ public class RoomController {
         return documents.isEmpty()
                 ? List.of()
                 : documents.getDocuments().stream()
-                    .map((snapshot) -> {
-                        RoomData res = snapshot.toObject(RoomData.class);
-                        res.setId(snapshot.getId());
-                        return res;
-                    })
-                    .collect(Collectors.toList());
+                .map((snapshot) -> {
+                    RoomData res = snapshot.toObject(RoomData.class);
+                    res.setId(snapshot.getId());
+                    return res;
+                })
+                .collect(Collectors.toList());
 
     }
+
     @Produces(MediaType.APPLICATION_JSON)
     @Get("/all-rooms")
     public List<Object> index() throws InterruptedException, ExecutionException {
@@ -60,12 +62,12 @@ public class RoomController {
         return documents.isEmpty()
                 ? List.of()
                 : documents.getDocuments().stream()
-                    .map((snapshot) -> {
-                        RoomData res = snapshot.toObject(RoomData.class);
-                        res.setId(snapshot.getId());
-                        return res;
-                    })
-                    .collect(Collectors.toList());
+                .map((snapshot) -> {
+                    RoomData res = snapshot.toObject(RoomData.class);
+                    res.setId(snapshot.getId());
+                    return res;
+                })
+                .collect(Collectors.toList());
 
     }
 
@@ -73,7 +75,7 @@ public class RoomController {
     public void deleteRoom(@Body String roomId) throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
-        if(roomId == null) {
+        if (roomId == null) {
             throw new IllegalArgumentException("Invalid data");
         }
 
@@ -86,8 +88,8 @@ public class RoomController {
     public void editRoom(@Body EditRoomRequest request) throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
-        if(request.getRoomId() == null || request.getEditName() == null ||
-           request.getEditSize() == null) {
+        if (request.getRoomId() == null || request.getEditName() == null ||
+                request.getEditSize() == null) {
             throw new IllegalArgumentException("Invalid data");
         }
 
@@ -137,4 +139,51 @@ public class RoomController {
     //         throw new IllegalArgumentException("Reservation already exists");
     //     }
     // }
+
+    @Post("/get-available-rooms")
+    public List<RoomData> getAvailableSlots(@Body DatetimeData term) throws InterruptedException, ExecutionException {
+        Firestore db = firebase.getDb();
+
+//        Query query = db.collection("teams").whereEqualTo("teamLeader", principal.getName());
+        Query teamQuery = db.collection("teams")
+                .whereEqualTo("teamLeader", "mboruwa");
+        QuerySnapshot teamDocuments = teamQuery.get().get();
+        if (teamDocuments.isEmpty()) {
+            throw new IllegalArgumentException("You are not a team leader");
+        }
+        TeamData team = teamDocuments.getDocuments().get(0).toObject(TeamData.class);
+
+        Query reservationsQuery = db.collection("reservations")
+                .whereEqualTo("date", term.getDate())
+                .whereEqualTo("time", term.getTime());
+
+        QuerySnapshot reservationsDocuments = reservationsQuery.get().get();
+        List<ReservationData> reservedRooms = reservationsDocuments.getDocuments().stream()
+                .map((snapshot) -> snapshot.toObject(ReservationData.class))
+                .collect(Collectors.toList());
+        Query roomsQuery = db.collection("rooms")
+                .whereGreaterThanOrEqualTo("size", team.getTeamMembers().size())
+                .orderBy("size", Query.Direction.ASCENDING);
+
+        QuerySnapshot roomsDocuments = roomsQuery.get().get();
+        if (roomsDocuments.isEmpty()) {
+            throw new IllegalArgumentException("Team doesn't fit in any room");
+        }
+        List<RoomData> rooms = roomsDocuments.getDocuments().stream()
+                .map((snapshot) -> {
+                    RoomData room = snapshot.toObject(RoomData.class);
+                    room.setId(snapshot.getId());
+                    return room;
+                })
+                .collect(Collectors.toList());
+        for (ReservationData reservation : reservedRooms) {
+            if (reservation.getUser().equals("mboruwa")) {
+                throw new ReservedRoomException("You already have a reservation at this time");
+            }
+            rooms.removeIf((r) -> r.getName().equals(reservation.getRoom()));
+        }
+
+        return rooms;
+    }
+
 }
