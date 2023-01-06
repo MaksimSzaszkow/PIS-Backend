@@ -30,9 +30,7 @@ public class RoomController {
     public List<Object> MyRooms() throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
-        // Query query = db.collection("rooms").whereEqualTo("user", principal.getName());
-        Query query = db.collection("rooms")
-                .whereEqualTo("user", "mboruwa");
+        Query query = db.collection("rooms").whereEqualTo("user", "mboruwa");
 
         ApiFuture<QuerySnapshot> querySnapshot = query.get();
         QuerySnapshot documents = querySnapshot.get();
@@ -53,20 +51,17 @@ public class RoomController {
         Firestore db = firebase.getDb();
 
         CollectionReference rooms = db.collection("rooms");
-        Query roomsQuery = rooms;
 
-        ApiFuture<QuerySnapshot> querySnapshot = roomsQuery.get();
-        QuerySnapshot documents = querySnapshot.get();
-        return documents.isEmpty()
+        QuerySnapshot allRooms = rooms.get().get();
+        return allRooms.isEmpty()
                 ? List.of()
-                : documents.getDocuments().stream()
+                : allRooms.getDocuments().stream()
                     .map((snapshot) -> {
                         RoomData res = snapshot.toObject(RoomData.class);
                         res.setId(snapshot.getId());
                         return res;
                     })
                     .collect(Collectors.toList());
-
     }
 
     @Post("/delete-room")
