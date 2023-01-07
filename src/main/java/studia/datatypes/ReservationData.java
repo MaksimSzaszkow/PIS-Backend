@@ -5,30 +5,40 @@ import javax.validation.constraints.NotNull;
 
 public class ReservationData {
 
-    @NotBlank
-    @NotNull
+    private String id;
+
     private String user;
 
-    @NotBlank
-    @NotNull
     private String date;
 
-    @NotBlank
-    @NotNull
-    private String time;
+    private int time;
 
-    @NotBlank
-    @NotNull
     private String room;
 
     public ReservationData() {
     }
 
-    public ReservationData(String user, String date, String time, String room) {
+    public ReservationData(String user, String date, int time, String room) {
         this.user = user;
         this.date = date;
         this.time = time;
         this.room = room;
+    }
+
+    public ReservationData(String id, String user, String date, int time, String room) {
+        this.id = id;
+        this.user = user;
+        this.date = date;
+        this.time = time;
+        this.room = room;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getUser() {
@@ -47,11 +57,14 @@ public class ReservationData {
         this.date = date;
     }
 
-    public String getTime() {
+    public int getTime() {
         return time;
     }
 
-    public void setTime(String time) {
+    public void setTime(int time) {
+        if (time < 9 || time > 17) {
+            throw new IllegalArgumentException("Invalid time");
+        }
         this.time = time;
     }
 
