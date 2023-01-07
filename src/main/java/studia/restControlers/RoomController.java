@@ -28,47 +28,41 @@ public class RoomController {
 
     @Produces(MediaType.APPLICATION_JSON)
     @Get("/my-rooms")
-    public List<Object> MyRooms() throws InterruptedException, ExecutionException {
+    public List<RoomData> MyRooms() throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
-        // Query query = db.collection("rooms").whereEqualTo("user", principal.getName());
-        Query query = db.collection("rooms")
-                .whereEqualTo("user", "mboruwa");
+        Query query = db.collection("rooms").whereEqualTo("user", "mboruwa");
 
-        ApiFuture<QuerySnapshot> querySnapshot = query.get();
-        QuerySnapshot documents = querySnapshot.get();
-        return documents.isEmpty()
+        QuerySnapshot allRooms = query.get().get();
+        return allRooms.isEmpty()
                 ? List.of()
-                : documents.getDocuments().stream()
-                .map((snapshot) -> {
-                    RoomData res = snapshot.toObject(RoomData.class);
-                    res.setId(snapshot.getId());
-                    return res;
-                })
-                .collect(Collectors.toList());
+                : allRooms.getDocuments().stream()
+                    .map((room) -> {
+                        RoomData res = room.toObject(RoomData.class);
+                        res.setId(room.getId());
+                        return res;
+                    })
+                    .collect(Collectors.toList());
 
     }
 
     @Produces(MediaType.APPLICATION_JSON)
     @Get("/all-rooms")
-    public List<Object> index() throws InterruptedException, ExecutionException {
+    public List<RoomData> index() throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
         CollectionReference rooms = db.collection("rooms");
-        Query roomsQuery = rooms;
 
-        ApiFuture<QuerySnapshot> querySnapshot = roomsQuery.get();
-        QuerySnapshot documents = querySnapshot.get();
-        return documents.isEmpty()
+        QuerySnapshot allRooms = rooms.get().get();
+        return allRooms.isEmpty()
                 ? List.of()
-                : documents.getDocuments().stream()
-                .map((snapshot) -> {
-                    RoomData res = snapshot.toObject(RoomData.class);
-                    res.setId(snapshot.getId());
-                    return res;
-                })
-                .collect(Collectors.toList());
-
+                : allRooms.getDocuments().stream()
+                    .map((room) -> {
+                        RoomData res = room.toObject(RoomData.class);
+                        res.setId(room.getId());
+                        return res;
+                    })
+                    .collect(Collectors.toList());
     }
 
     @Post("/delete-room")
