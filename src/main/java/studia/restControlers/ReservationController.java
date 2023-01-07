@@ -32,16 +32,11 @@ public class ReservationController {
 
     @Produces(MediaType.APPLICATION_JSON)
     @Get("/my-reservations")
-    public List<ReservationData> MyReservations() throws InterruptedException, ExecutionException {
+    public List<ReservationData> MyReservations(Principal principal) throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
-//        Query reservationsQuery = db.collection("reservations")
-//                .whereEqualTo("user", principal.getName())
-//                .orderBy("date", Query.Direction.ASCENDING)
-//                .orderBy("time", Query.Direction.ASCENDING);
-
         Query reservationsQuery = db.collection("reservations")
-                .whereEqualTo("user", "mboruwa")
+                .whereEqualTo("user", principal.getName())
                 .orderBy("date", Query.Direction.ASCENDING)
                 .orderBy("time", Query.Direction.ASCENDING);
 
@@ -81,12 +76,11 @@ public class ReservationController {
     }
 
     @Post("/add-reservation")
-    public void addReservation(@Body ReservationData data) throws InterruptedException, ExecutionException {
+    public void addReservation(@Body ReservationData data, Principal principal) throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
         if (
-                data.getUser() == null ||
-                        data.getDate() == null ||
+                data.getDate() == null ||
                         data.getTime() > 17 ||
                         data.getTime() < 9 ||
                         data.getRoom() == null
@@ -106,7 +100,7 @@ public class ReservationController {
         if (reservationsQuerySnapshot.isEmpty()) {
             ApiFuture<WriteResult> result = reservations.document().set(
                     Map.of(
-                            "user", data.getUser(),
+                            "user", principal.getName(),
                             "date", data.getDate(),
                             "time", data.getTime(),
                             "room", data.getRoom()

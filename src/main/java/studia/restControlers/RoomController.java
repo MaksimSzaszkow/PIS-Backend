@@ -28,21 +28,21 @@ public class RoomController {
 
     @Produces(MediaType.APPLICATION_JSON)
     @Get("/my-rooms")
-    public List<RoomData> MyRooms() throws InterruptedException, ExecutionException {
+    public List<RoomData> MyRooms(Principal principal) throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
-        Query query = db.collection("rooms").whereEqualTo("user", "mboruwa");
+        Query query = db.collection("rooms").whereEqualTo("user", principal.getName());
 
         QuerySnapshot allRooms = query.get().get();
         return allRooms.isEmpty()
                 ? List.of()
                 : allRooms.getDocuments().stream()
-                    .map((room) -> {
-                        RoomData res = room.toObject(RoomData.class);
-                        res.setId(room.getId());
-                        return res;
-                    })
-                    .collect(Collectors.toList());
+                .map((room) -> {
+                    RoomData res = room.toObject(RoomData.class);
+                    res.setId(room.getId());
+                    return res;
+                })
+                .collect(Collectors.toList());
 
     }
 
@@ -57,12 +57,12 @@ public class RoomController {
         return allRooms.isEmpty()
                 ? List.of()
                 : allRooms.getDocuments().stream()
-                    .map((room) -> {
-                        RoomData res = room.toObject(RoomData.class);
-                        res.setId(room.getId());
-                        return res;
-                    })
-                    .collect(Collectors.toList());
+                .map((room) -> {
+                    RoomData res = room.toObject(RoomData.class);
+                    res.setId(room.getId());
+                    return res;
+                })
+                .collect(Collectors.toList());
     }
 
     @Post("/delete-room")
@@ -135,12 +135,10 @@ public class RoomController {
     // }
 
     @Post("/get-available-rooms")
-    public List<RoomData> getAvailableSlots(@Body DatetimeData term) throws InterruptedException, ExecutionException {
+    public List<RoomData> getAvailableSlots(@Body DatetimeData term, Principal principal) throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
-//        Query query = db.collection("teams").whereEqualTo("teamLeader", principal.getName());
-        Query teamQuery = db.collection("teams")
-                .whereEqualTo("teamLeader", "mboruwa");
+        Query teamQuery = db.collection("teams").whereEqualTo("teamLeader", principal.getName());
         QuerySnapshot teamDocuments = teamQuery.get().get();
         if (teamDocuments.isEmpty()) {
             throw new IllegalArgumentException("You are not a team leader");
@@ -171,7 +169,7 @@ public class RoomController {
                 })
                 .collect(Collectors.toList());
         for (ReservationData reservation : reservedRooms) {
-            if (reservation.getUser().equals("mboruwa")) {
+            if (reservation.getUser().equals(principal.getName())) {
                 throw new ReservedRoomException("You already have a reservation at this time");
             }
             rooms.removeIf((r) -> r.getName().equals(reservation.getRoom()));
