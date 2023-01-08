@@ -1,6 +1,8 @@
 package studia.restControlers;
 
 import com.google.cloud.firestore.*;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.*;
 import io.micronaut.security.annotation.Secured;
@@ -47,6 +49,11 @@ public class ReservationController {
                 : reservationsDocuments.getDocuments().stream()
                 .map((snapshot) -> {
                     ReservationData res = snapshot.toObject(ReservationData.class);
+                    try {
+                        res.setUser(FirebaseAuth.getInstance().getUser(res.getUser()).getEmail());
+                    } catch (FirebaseAuthException e) {
+                        throw new RuntimeException(e);
+                    }
                     res.setId(snapshot.getId());
                     return res;
                 })
@@ -68,6 +75,11 @@ public class ReservationController {
                 : reservationsDocuments.getDocuments().stream()
                 .map((snapshot) -> {
                     ReservationData res = snapshot.toObject(ReservationData.class);
+                    try {
+                        res.setUser(FirebaseAuth.getInstance().getUser(res.getUser()).getEmail());
+                    } catch (FirebaseAuthException e) {
+                        throw new RuntimeException(e);
+                    }
                     res.setId(snapshot.getId());
                     return res;
                 })
