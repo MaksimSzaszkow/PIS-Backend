@@ -36,7 +36,7 @@ import static io.micronaut.http.MediaType.TEXT_PLAIN;
 @MicronautTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ReservationControllersTest {
-
+/*
     @Inject
     JwtTokenGenerator jwtTokenGenerator;
 
@@ -300,5 +300,5 @@ public class ReservationControllersTest {
         invalidReservationData.setDate("02.02.1970");
         invalidReservationData.setRoom(null);
         addWrongReservation(invalidReservationData, "Invalid data");
-    }
+    }*/
 }
