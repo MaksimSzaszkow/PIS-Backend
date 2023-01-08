@@ -101,38 +101,34 @@ public class RoomController {
         }
     }
 
-    // @Post("/add-room")
-    // public void addReservation(@Body ReservationData data) throws InterruptedException, ExecutionException {
-    //     Firestore db = firebase.getDb();
+    @Post("/add-room")
+    public void addRoom(@Body AddRoomRequest request) throws InterruptedException, ExecutionException {
+        Firestore db = firebase.getDb();
+
+        if (request.getName() == null || request.getSize() == null) {
+            throw new IllegalArgumentException("Invalid data");
+        }
+
+        CollectionReference rooms = db.collection("rooms");
+        QuerySnapshot querySnapshot = rooms
+                .whereEqualTo("name", request.getName())
+                .whereEqualTo("size", request.getSize())
+                .get()
+                .get();
 
 
-    //     if(data.getUser() == null || data.getDate() == null || data.getTime() == null || data.getRoom() == null) {
-    //         throw new IllegalArgumentException("Invalid data");
-    //     }
-
-    //     CollectionReference reservations = db.collection("reservations");
-    //     QuerySnapshot querySnapshot = reservations
-    //             .whereEqualTo("date", data.getDate())
-    //             .whereEqualTo("time", data.getTime())
-    //             .whereEqualTo("room", data.getRoom())
-    //             .get()
-    //             .get();
-
-
-    //     if(querySnapshot.isEmpty()) {
-    //         DocumentReference docRef = reservations.document();
-    //         ApiFuture<WriteResult> result = docRef.set(
-    //                 Map.of(
-    //                         "user", data.getUser(),
-    //                         "date", data.getDate(),
-    //                         "time", data.getTime(),
-    //                         "room", data.getRoom()
-    //                 )
-    //         );
-    //     } else {
-    //         throw new IllegalArgumentException("Reservation already exists");
-    //     }
-    // }
+        if(querySnapshot.isEmpty()) {
+            DocumentReference docRef = rooms.document();
+            ApiFuture<WriteResult> result = docRef.set(
+                    Map.of(
+                            "name", request.getName(),
+                            "size", request.getSize()
+                    )
+            );
+        } else {
+            throw new IllegalArgumentException("Room already exists");
+        }
+    }
 
     @Post("/get-available-rooms")
     public List<RoomData> getAvailableSlots(@Body DatetimeData term, Principal principal) throws InterruptedException, ExecutionException {
