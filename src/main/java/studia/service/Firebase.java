@@ -43,13 +43,12 @@ public class Firebase {
             var firestoreOptions = FirestoreOptions.getDefaultInstance().toBuilder()
                     .setCredentials(credentials)
                     .build();
-            
+
             FirebaseApp.initializeApp(firebaseOptions);
             db = firestoreOptions.getService();
-            
+
             initialized = true;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LoggerFactory
                     .getLogger(Firebase.class)
                     .error("Failed to initialize Firebase authentication", e);

@@ -1,12 +1,14 @@
 package studia.restControlers;
 
+import com.google.firebase.auth.FirebaseAuthException;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.client.HttpClient;
 import io.micronaut.http.client.annotation.Client;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
-import io.micronaut.security.authentication.AuthenticationResponse;
+import io.micronaut.security.authentication.Authentication;
 import io.micronaut.security.authentication.UsernamePasswordCredentials;
+import io.micronaut.security.token.jwt.generator.JwtTokenGenerator;
 import io.micronaut.security.token.jwt.render.BearerAccessRefreshToken;
 import io.micronaut.test.annotation.MockBean;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
@@ -15,11 +17,11 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import reactor.core.publisher.Flux;
 import studia.datatypes.EditReservationRequest;
 import studia.datatypes.ReservationData;
-import studia.service.AuthProvider;
+import studia.datatypes.UserDetails;
 
+import java.util.Collections;
 import java.util.Objects;
 
 import static io.micronaut.http.HttpStatus.OK;
@@ -35,7 +37,12 @@ import static io.micronaut.http.MediaType.TEXT_PLAIN;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ReservationControllersTest {
 
+    @Inject
+    JwtTokenGenerator jwtTokenGenerator;
+
+
     private static final String USERNAME = "testUser";
+    private static final UserDetails USER = new UserDetails(USERNAME, Collections.emptyList(), Collections.emptyMap());
 
     private final ReservationData reservationData = new ReservationData(
             USERNAME, "01.01.1970", 12, "room 1"
@@ -48,19 +55,7 @@ public class ReservationControllersTest {
     }
 
     private void authenticate() {
-        when(authProvider.authenticate(any(), any())).thenReturn(Flux.just(AuthenticationResponse.success(USERNAME)));
-        UsernamePasswordCredentials creds = new UsernamePasswordCredentials("test", "test");
-        HttpRequest<UsernamePasswordCredentials> request = HttpRequest.POST("/login", creds);
-        HttpResponse<BearerAccessRefreshToken> rsp = client.toBlocking().exchange(request, BearerAccessRefreshToken.class);
-
-        assertEquals(OK, rsp.getStatus());
-
-        BearerAccessRefreshToken bearerAccessRefreshToken = rsp.body();
-
-        assert bearerAccessRefreshToken != null;
-        assertEquals(USERNAME, bearerAccessRefreshToken.getUsername());
-
-        setToken(bearerAccessRefreshToken.getAccessToken());
+        jwtTokenGenerator.generateToken(USER, 120).ifPresent(this::setToken);
     }
 
     private ReservationData[] fetchReservations() {
@@ -103,14 +98,6 @@ public class ReservationControllersTest {
         assertEquals(reservationData.getDate(), testReservation.getDate());
         assertEquals(reservationData.getRoom(), testReservation.getRoom());
     }
-
-    @MockBean(AuthProvider.class)
-    AuthProvider mockAuthProvider() {
-        return mock(AuthProvider.class);
-    }
-
-    @Inject
-    private AuthProvider authProvider;
 
 
     @Inject
