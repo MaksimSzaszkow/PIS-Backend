@@ -130,7 +130,7 @@ public class ReservationController {
         Firestore db = firebase.getDb();
 
         if (request.getReservationId() == null || request.getEditDate() == null ||
-                request.getEditTime() == null || request.getEditUser() == null) {
+                request.getEditTime() > 17 || request.getEditTime() < 9 || request.getEditUser() == null) {
             throw new IllegalArgumentException("Invalid data");
         }
 

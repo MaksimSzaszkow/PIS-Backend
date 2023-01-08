@@ -14,16 +14,23 @@ repositories {
 }
 
 sonarqube {
-  properties {
-    property "sonar.projectKey", "PIS-Backend";
-    property "sonar.jacoco.reportPaths", "build/reports/jacoco/test/jacocoTestReport.xml";
-  }
+    properties {
+        property "sonar.projectKey", "PIS-Backend";
+        property "sonar.jacoco.reportPaths", "build/reports/jacoco/test/jacocoTestReport.xml";
+    }
 }
 
 dependencies {
     annotationProcessor("io.micronaut:micronaut-http-validation")
     annotationProcessor("io.micronaut.security:micronaut-security-annotations")
     annotationProcessor("io.micronaut.data:micronaut-data-processor")
+
+    testAnnotationProcessor "io.micronaut:micronaut-inject-java"
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation("io.micronaut.test:micronaut-test-junit5:3.8.0")
+    testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.9.0')
+    testImplementation('org.junit.jupiter:junit-jupiter-engine:5.9.0')
+    testImplementation "org.mockito:mockito-core:3.+"
 
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-jackson-databind")
@@ -93,6 +100,7 @@ publishing {
 }
 
 test {
+    useJUnitPlatform()
     finalizedBy jacocoTestReport
 }
 jacocoTestReport {
