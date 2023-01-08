@@ -1,10 +1,8 @@
-FROM alpine
+FROM openjdk:11
 WORKDIR /backend
 
-ADD . /backend
-
-RUN ./gradlew build
+ADD ./build/libs/pis-backend-0.1-all.jar application.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["./gradlew", "run"]
+CMD java -jar application.jar

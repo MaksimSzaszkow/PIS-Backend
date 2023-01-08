@@ -1,6 +1,28 @@
 micronaut:
   application:
     name: pisBackend
+  security:
+    authentication: bearer
+    token:
+      jwt:
+        signatures:
+          secret:
+            generator:
+              secret: '"${JWT_GENERATOR_SIGNATURE_SECRET:pleaseChangeThisSecretForANewOne}"'
+
+  server:
+    cors:
+      enabled: true
+      configurations:
+        web:
+          allowedOrigins:
+            - http://localhost:3000
+          allowedHeaders:
+            - Content-Type
+            - Authorization
+          exposedHeaders:
+            - Content-Type
+            - Authorization
 netty:
   default:
     allocator:
