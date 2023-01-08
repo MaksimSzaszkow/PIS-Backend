@@ -19,6 +19,8 @@ import javax.inject.Inject;
 
 import com.google.api.core.ApiFuture;
 
+import static io.micronaut.http.HttpHeaders.AUTHORIZATION;
+
 @Secured(SecurityRule.IS_AUTHENTICATED)
 @Controller("/rooms")
 public class RoomController {
@@ -131,10 +133,15 @@ public class RoomController {
     }
 
     @Post("/get-available-rooms")
-    public List<RoomData> getAvailableSlots(@Body DatetimeData term, Principal principal) throws InterruptedException, ExecutionException {
+    public List<RoomData> getAvailableSlots(
+            @Header(AUTHORIZATION) String authorization,
+            @Body DatetimeData term,
+            Principal principal
+    ) throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
         Query teamQuery = db.collection("teams").whereEqualTo("teamLeader", principal.getName());
+        System.out.println(principal.getName());
         QuerySnapshot teamDocuments = teamQuery.get().get();
         if (teamDocuments.isEmpty()) {
             throw new IllegalArgumentException("You are not a team leader");
