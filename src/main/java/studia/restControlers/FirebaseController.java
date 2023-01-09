@@ -5,12 +5,7 @@ import static io.micronaut.http.HttpHeaders.AUTHORIZATION;
 
 import studia.utils.*;
 
-import java.util.Base64;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import javax.inject.Inject;
 
@@ -76,7 +71,7 @@ public class FirebaseController {
     @Secured(SecurityRule.IS_AUTHENTICATED)
     public void set_user_role(@Header(AUTHORIZATION) String authorization, @Body SetRole setRole) {
         try {
-            if (UserRole.getRole(authorization) == "admin") {
+            if (Objects.equals(UserRole.getRole(authorization), "admin")) {
                 var claims = new HashMap<String, Object>();
                 claims.put("role", setRole.role);
                 FirebaseAuth.getInstance().setCustomUserClaims(setRole.uid, claims);

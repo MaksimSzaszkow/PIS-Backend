@@ -29,7 +29,7 @@ public class ReservationController {
 
     @Produces(MediaType.APPLICATION_JSON)
     @Get("/my-reservations")
-    public List<ReservationData> MyReservations(Principal principal) throws InterruptedException, ExecutionException {
+    public List<ReservationData> myReservations(Principal principal) throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
         Query reservationsQuery = db.collection(COLLECTION_NAME)
@@ -78,7 +78,7 @@ public class ReservationController {
 
 
         if (reservationsQuerySnapshot.isEmpty()) {
-            ApiFuture<WriteResult> result = reservations.document().set(
+            reservations.document().set(
                     Map.of(
                             "user", principal.getName(),
                             "date", data.getDate(),
@@ -93,14 +93,14 @@ public class ReservationController {
 
 
     @Post("/delete-reservation")
-    public void deleteReservation(@Body String reservationId) throws InterruptedException, ExecutionException {
+    public void deleteReservation(@Body String reservationId) {
         Firestore db = firebase.getDb();
 
         if (reservationId == null) {
             throw new IllegalArgumentException("Invalid data");
         }
 
-        ApiFuture<WriteResult> writeResult = db.collection(COLLECTION_NAME).document(reservationId).delete();
+        db.collection(COLLECTION_NAME).document(reservationId).delete();
 
     }
 
@@ -117,7 +117,7 @@ public class ReservationController {
         DocumentSnapshot reservationQuerySnapshot = reservation.get().get();
 
         if (reservationQuerySnapshot.exists()) {
-            ApiFuture<WriteResult> result = reservation.update(
+            reservation.update(
                     Map.of(
                             "user", request.getEditUser(),
                             "date", request.getEditDate(),
