@@ -38,7 +38,7 @@ import static io.micronaut.http.MediaType.TEXT_PLAIN;
 
 @MicronautTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class ReservationControllersTest {
+class ReservationControllerTest {
     @Inject
     JwtTokenGenerator jwtTokenGenerator;
 

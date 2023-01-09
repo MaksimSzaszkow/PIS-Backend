@@ -8,6 +8,7 @@ import io.micronaut.security.rules.SecurityRule;
 import studia.datatypes.*;
 import studia.exceptionHandlers.ReservedRoomException;
 import studia.service.Firebase;
+import studia.utils.RoomUtils;
 
 import java.security.Principal;
 import java.util.List;
@@ -38,16 +39,7 @@ public class RoomController {
         Query query = db.collection(COLLECTION_NAME).whereEqualTo("user", principal.getName());
 
         QuerySnapshot allRooms = query.get().get();
-        return allRooms.isEmpty()
-                ? List.of()
-                : allRooms.getDocuments().stream()
-                .map(room -> {
-                    RoomData res = room.toObject(RoomData.class);
-                    res.setId(room.getId());
-                    return res;
-                })
-                .collect(Collectors.toList());
-
+        return RoomUtils.mapRooms(allRooms);
     }
 
     @Produces(MediaType.APPLICATION_JSON)
@@ -78,8 +70,6 @@ public class RoomController {
         }
 
         ApiFuture<WriteResult> writeResult = db.collection(COLLECTION_NAME).document(roomId).delete();
-
-        System.out.println("Update time : " + writeResult.get().getUpdateTime());
     }
 
     @Post("/edit-room")
@@ -101,7 +91,7 @@ public class RoomController {
                             "size", request.getEditSize()
                     ));
         } else {
-            throw new IllegalArgumentException("Room doesn't exist");
+            throw new IllegalArgumentException("Room does not exist");
         }
     }
 
