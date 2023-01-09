@@ -5,17 +5,10 @@ import static io.micronaut.http.HttpHeaders.AUTHORIZATION;
 
 import studia.utils.*;
 
-import java.util.Base64;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import javax.inject.Inject;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 
@@ -29,7 +22,6 @@ import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
 import io.micronaut.security.token.jwt.generator.JwtTokenGenerator;
 import studia.datatypes.SetRole;
-import studia.datatypes.UserData;
 import studia.datatypes.UserDetails;
 import studia.service.Firebase;
 
@@ -76,7 +68,7 @@ public class FirebaseController {
     @Secured(SecurityRule.IS_AUTHENTICATED)
     public void set_user_role(@Header(AUTHORIZATION) String authorization, @Body SetRole setRole) {
         try {
-            if (UserRole.getRole(authorization) == "admin") {
+            if (Objects.equals(UserRole.getRole(authorization), "admin")) {
                 var claims = new HashMap<String, Object>();
                 claims.put("role", setRole.role);
                 FirebaseAuth.getInstance().setCustomUserClaims(setRole.uid, claims);

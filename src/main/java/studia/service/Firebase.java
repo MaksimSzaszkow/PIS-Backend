@@ -10,7 +10,9 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
 import io.micronaut.core.io.ResourceResolver;
 import io.micronaut.core.io.scan.ClassPathResourceLoader;
+
 import java.io.IOException;
+
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
@@ -29,9 +31,16 @@ public class Firebase {
         }
 
         try {
+            if (new ResourceResolver().getLoader(ClassPathResourceLoader.class).isEmpty())
+                throw new IOException("ResourceResolver is empty");
+
             var loader = new ResourceResolver()
                     .getLoader(ClassPathResourceLoader.class)
                     .get();
+
+
+            if ((loader.getResourceAsStream("firebase-adminsdk.json").isEmpty()))
+                throw new IOException("firebase-adminsdk.json is empty");
 
             var credentials = GoogleCredentials.fromStream(
                     loader.getResourceAsStream("firebase-adminsdk.json").get());
