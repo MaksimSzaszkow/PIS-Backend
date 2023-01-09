@@ -1,29 +1,23 @@
 package studia.restControlers;
 
 import com.google.cloud.firestore.*;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
 import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.*;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
-import studia.datatypes.DatetimeData;
 import studia.datatypes.EditReservationRequest;
 import studia.datatypes.ReservationData;
-import studia.datatypes.RoomData;
-import studia.datatypes.TeamData;
-import studia.exceptionHandlers.ReservedRoomException;
 import studia.service.Firebase;
 
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import com.google.api.core.ApiFuture;
+import studia.utils.ReservationUtils;
 
 @Secured(SecurityRule.IS_AUTHENTICATED)
 @Controller("/reservation")
@@ -31,33 +25,21 @@ public class ReservationController {
 
     @Inject
     private Firebase firebase;
+    private static final String COLLECTION_NAME = "reservations";
 
     @Produces(MediaType.APPLICATION_JSON)
     @Get("/my-reservations")
     public List<ReservationData> MyReservations(Principal principal) throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
-        Query reservationsQuery = db.collection("reservations")
+        Query reservationsQuery = db.collection(COLLECTION_NAME)
                 .whereEqualTo("user", principal.getName())
                 .orderBy("date", Query.Direction.ASCENDING)
                 .orderBy("time", Query.Direction.ASCENDING);
 
-        ApiFuture<QuerySnapshot> reservationsQuerySnapshot = reservationsQuery.get();
-        QuerySnapshot reservationsDocuments = reservationsQuerySnapshot.get();
-        return reservationsDocuments.isEmpty()
-                ? List.of()
-                : reservationsDocuments.getDocuments().stream()
-                .map((snapshot) -> {
-                    ReservationData res = snapshot.toObject(ReservationData.class);
-                    try {
-                        res.setUser(FirebaseAuth.getInstance().getUser(res.getUser()).getEmail());
-                    } catch (FirebaseAuthException e) {
-                        throw new RuntimeException(e);
-                    }
-                    res.setId(snapshot.getId());
-                    return res;
-                })
-                .collect(Collectors.toList());
+
+        QuerySnapshot reservationsDocuments = reservationsQuery.get().get();
+        return ReservationUtils.mapReservations(reservationsDocuments);
     }
 
     @Produces(MediaType.APPLICATION_JSON)
@@ -65,26 +47,12 @@ public class ReservationController {
     public List<ReservationData> index() throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
-        Query reservationsQuery = db.collection("reservations")
+        Query reservationsQuery = db.collection(COLLECTION_NAME)
                 .orderBy("date", Query.Direction.ASCENDING)
                 .orderBy("time", Query.Direction.ASCENDING);
 
         QuerySnapshot reservationsDocuments = reservationsQuery.get().get();
-        return reservationsDocuments.isEmpty()
-                ? List.of()
-                : reservationsDocuments.getDocuments().stream()
-                .map((snapshot) -> {
-                    ReservationData res = snapshot.toObject(ReservationData.class);
-                    try {
-                        res.setUser(FirebaseAuth.getInstance().getUser(res.getUser()).getEmail());
-                    } catch (FirebaseAuthException e) {
-                        throw new RuntimeException(e);
-                    }
-                    res.setId(snapshot.getId());
-                    return res;
-                })
-                .collect(Collectors.toList());
-
+        return ReservationUtils.mapReservations(reservationsDocuments);
     }
 
     @Post("/add-reservation")
@@ -100,7 +68,7 @@ public class ReservationController {
             throw new IllegalArgumentException("Invalid data");
         }
 
-        CollectionReference reservations = db.collection("reservations");
+        CollectionReference reservations = db.collection(COLLECTION_NAME);
         QuerySnapshot reservationsQuerySnapshot = reservations
                 .whereEqualTo("date", data.getDate())
                 .whereEqualTo("time", data.getTime())
@@ -132,9 +100,8 @@ public class ReservationController {
             throw new IllegalArgumentException("Invalid data");
         }
 
-        ApiFuture<WriteResult> writeResult = db.collection("reservations").document(reservationId).delete();
+        ApiFuture<WriteResult> writeResult = db.collection(COLLECTION_NAME).document(reservationId).delete();
 
-        System.out.println("Update time : " + writeResult.get().getUpdateTime());
     }
 
     @Post("/edit-reservation")
@@ -146,7 +113,7 @@ public class ReservationController {
             throw new IllegalArgumentException("Invalid data");
         }
 
-        DocumentReference reservation = db.collection("reservations").document(request.getReservationId());
+        DocumentReference reservation = db.collection(COLLECTION_NAME).document(request.getReservationId());
         DocumentSnapshot reservationQuerySnapshot = reservation.get().get();
 
         if (reservationQuerySnapshot.exists()) {
