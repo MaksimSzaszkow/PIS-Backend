@@ -25,21 +25,23 @@ import static io.micronaut.http.HttpHeaders.AUTHORIZATION;
 @Controller("/rooms")
 public class RoomController {
 
+    final String COLLECTION_NAME = "rooms";
+
     @Inject
     private Firebase firebase;
 
     @Produces(MediaType.APPLICATION_JSON)
     @Get("/my-rooms")
-    public List<RoomData> MyRooms(Principal principal) throws InterruptedException, ExecutionException {
+    public List<RoomData> myRooms(Principal principal) throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
-        Query query = db.collection("rooms").whereEqualTo("user", principal.getName());
+        Query query = db.collection(COLLECTION_NAME).whereEqualTo("user", principal.getName());
 
         QuerySnapshot allRooms = query.get().get();
         return allRooms.isEmpty()
                 ? List.of()
                 : allRooms.getDocuments().stream()
-                .map((room) -> {
+                .map(room -> {
                     RoomData res = room.toObject(RoomData.class);
                     res.setId(room.getId());
                     return res;
@@ -53,7 +55,7 @@ public class RoomController {
     public List<RoomData> index() throws InterruptedException, ExecutionException {
         Firestore db = firebase.getDb();
 
-        CollectionReference rooms = db.collection("rooms");
+        CollectionReference rooms = db.collection(COLLECTION_NAME);
 
         QuerySnapshot allRooms = rooms.get().get();
         return allRooms.isEmpty()
@@ -75,7 +77,7 @@ public class RoomController {
             throw new IllegalArgumentException("Invalid data");
         }
 
-        ApiFuture<WriteResult> writeResult = db.collection("rooms").document(roomId).delete();
+        ApiFuture<WriteResult> writeResult = db.collection(COLLECTION_NAME).document(roomId).delete();
 
         System.out.println("Update time : " + writeResult.get().getUpdateTime());
     }
@@ -89,11 +91,11 @@ public class RoomController {
             throw new IllegalArgumentException("Invalid data");
         }
 
-        DocumentReference room = db.collection("rooms").document(request.getRoomId());
+        DocumentReference room = db.collection(COLLECTION_NAME).document(request.getRoomId());
         DocumentSnapshot roomQuerySnapshot = room.get().get();
 
         if (roomQuerySnapshot.exists()) {
-            ApiFuture<WriteResult> result = room.update(
+            room.update(
                     Map.of(
                             "name", request.getEditName(),
                             "size", request.getEditSize()
@@ -111,7 +113,7 @@ public class RoomController {
             throw new IllegalArgumentException("Invalid data");
         }
 
-        CollectionReference rooms = db.collection("rooms");
+        CollectionReference rooms = db.collection(COLLECTION_NAME);
         QuerySnapshot querySnapshot = rooms
                 .whereEqualTo("name", request.getName())
                 .whereEqualTo("size", request.getSize())
@@ -119,9 +121,9 @@ public class RoomController {
                 .get();
 
 
-        if(querySnapshot.isEmpty()) {
+        if (querySnapshot.isEmpty()) {
             DocumentReference docRef = rooms.document();
-            ApiFuture<WriteResult> result = docRef.set(
+            docRef.set(
                     Map.of(
                             "name", request.getName(),
                             "size", request.getSize()
@@ -156,7 +158,7 @@ public class RoomController {
         List<ReservationData> reservedRooms = reservationsDocuments.getDocuments().stream()
                 .map((snapshot) -> snapshot.toObject(ReservationData.class))
                 .collect(Collectors.toList());
-        Query roomsQuery = db.collection("rooms")
+        Query roomsQuery = db.collection(COLLECTION_NAME)
                 .whereGreaterThanOrEqualTo("size", team.getTeamMembers().size())
                 .orderBy("size", Query.Direction.ASCENDING);
 

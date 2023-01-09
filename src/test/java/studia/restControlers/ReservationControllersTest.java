@@ -27,11 +27,9 @@ import studia.utils.ReservationUtils;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import static io.micronaut.http.HttpStatus.OK;
 import static io.micronaut.http.MediaType.APPLICATION_JSON;
-import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -40,7 +38,7 @@ import static io.micronaut.http.MediaType.TEXT_PLAIN;
 
 @MicronautTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class ReservationControllersTest {
+class ReservationControllersTest {
     @Inject
     JwtTokenGenerator jwtTokenGenerator;
 
@@ -337,7 +335,7 @@ public class ReservationControllersTest {
     void addReservationTest() throws InterruptedException, ExecutionException, FirebaseAuthException {
         authenticate();
         addReservation(token);
-        sleep(1000);
+
         ReservationData[] fetchedReservations = fetchReservations(false);
         assertEquals(reservationsList.size(), Objects.requireNonNull(fetchedReservations).length);
         checkReservationData(fetchedReservations);

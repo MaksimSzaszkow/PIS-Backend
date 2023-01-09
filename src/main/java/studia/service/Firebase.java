@@ -33,6 +33,7 @@ public class Firebase {
         try {
             if (new ResourceResolver().getLoader(ClassPathResourceLoader.class).isEmpty())
                 throw new IOException("ResourceResolver is empty");
+
             var loader = new ResourceResolver()
                     .getLoader(ClassPathResourceLoader.class)
                     .get();

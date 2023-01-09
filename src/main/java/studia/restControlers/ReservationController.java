@@ -16,7 +16,6 @@ import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
-import com.google.api.core.ApiFuture;
 import studia.utils.ReservationUtils;
 
 @Secured(SecurityRule.IS_AUTHENTICATED)

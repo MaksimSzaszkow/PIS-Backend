@@ -9,8 +9,6 @@ import java.util.*;
 
 import javax.inject.Inject;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 
@@ -24,7 +22,6 @@ import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
 import io.micronaut.security.token.jwt.generator.JwtTokenGenerator;
 import studia.datatypes.SetRole;
-import studia.datatypes.UserData;
 import studia.datatypes.UserDetails;
 import studia.service.Firebase;
 
