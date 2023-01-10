@@ -1,4 +1,5 @@
 package studia.datatypes;
+
 import java.util.List;
 
 public class AddTeamRequest {
