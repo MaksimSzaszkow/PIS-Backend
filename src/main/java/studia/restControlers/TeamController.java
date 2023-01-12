@@ -47,15 +47,7 @@ public class TeamController {
         CollectionReference teams = db.collection(COLLECTION_NAME);
 
         QuerySnapshot allTeams = teams.get().get();
-        return allTeams.isEmpty()
-                ? List.of()
-                : allTeams.getDocuments().stream()
-                        .map((team) -> {
-                            TeamData res = team.toObject(TeamData.class);
-                            res.setId(team.getId());
-                            return res;
-                        })
-                        .collect(Collectors.toList());
+        return TeamUtils.mapTeams(allTeams);
     }
 
     @Post("/delete-team")
